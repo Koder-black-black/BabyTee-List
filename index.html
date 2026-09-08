@@ -123,6 +123,45 @@
   </div>
 </div>
 
+<div class="overlay" id="claimOverlay">
+  <div class="panel">
+    <div class="close-row"><button class="close-btn" data-close="claimOverlay">Close</button></div>
+    <h2 class="serif" id="claimTitle">Claim this gift</h2>
+    <p class="sub">Sample mode — this stays on your device for now, but it collects the same details the real form will.</p>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div>
+          <p style="font-size:12px;color:var(--ink-soft);margin:0 0 4px;">First name</p>
+          <input type="text" id="cFirst" placeholder="Chiamaka" style="width:100%;font-size:13px;padding:8px 10px;border:1px solid var(--line);border-radius:6px;">
+        </div>
+        <div>
+          <p style="font-size:12px;color:var(--ink-soft);margin:0 0 4px;">Last name</p>
+          <input type="text" id="cLast" placeholder="Okafor" style="width:100%;font-size:13px;padding:8px 10px;border:1px solid var(--line);border-radius:6px;">
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div>
+          <p style="font-size:12px;color:var(--ink-soft);margin:0 0 4px;">Phone number</p>
+          <input type="text" id="cPhone" placeholder="080X XXX XXXX" style="width:100%;font-size:13px;padding:8px 10px;border:1px solid var(--line);border-radius:6px;">
+        </div>
+        <div>
+          <p style="font-size:12px;color:var(--ink-soft);margin:0 0 4px;">Email</p>
+          <input type="text" id="cEmail" placeholder="chiamaka@email.com" style="width:100%;font-size:13px;padding:8px 10px;border:1px solid var(--line);border-radius:6px;">
+        </div>
+      </div>
+      <div>
+        <p style="font-size:12px;color:var(--ink-soft);margin:0 0 4px;">Expected delivery date</p>
+        <input type="date" id="cDate" style="width:100%;font-size:13px;padding:8px 10px;border:1px solid var(--line);border-radius:6px;">
+      </div>
+      <p class="error-msg" id="claimError"></p>
+      <div style="display:flex;gap:8px;margin-top:4px;">
+        <button class="claim-btn" id="claimSubmit">Confirm gift</button>
+        <button class="claim-btn" data-close="claimOverlay" style="background:transparent;color:var(--ink-soft);border-color:var(--line);">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
 /* ====================== SETUP: fill these in ======================
    1. sheetId / sheetGid come from your Google Sheet's URL (the one linked
@@ -292,11 +331,7 @@ function renderGrid(){
   });
   if(DEMO_MODE){
     grid.querySelectorAll("[data-demo-claim]").forEach(btn => {
-      btn.addEventListener("click", () => {
-        const item = ITEMS.find(i => i.id === btn.dataset.demoClaim);
-        demoClaims[item.name] = { "Gift item": item.name, "Expected delivery date": "", "Delivered": "", "Relisted": "" };
-        render();
-      });
+      btn.addEventListener("click", () => openDemoClaimForm(btn.dataset.demoClaim));
     });
     grid.querySelectorAll("[data-demo-undo]").forEach(btn => {
       btn.addEventListener("click", () => {
@@ -307,6 +342,44 @@ function renderGrid(){
     });
   }
 }
+
+let pendingDemoItemId = null;
+
+function openDemoClaimForm(itemId){
+  pendingDemoItemId = itemId;
+  const item = ITEMS.find(i => i.id === itemId);
+  document.getElementById("claimTitle").textContent = "Claim: " + item.name;
+  ["cFirst","cLast","cPhone","cEmail","cDate"].forEach(id => document.getElementById(id).value = "");
+  document.getElementById("claimError").style.display = "none";
+  openOverlay("claimOverlay");
+}
+
+document.getElementById("claimSubmit").addEventListener("click", () => {
+  const first = document.getElementById("cFirst").value.trim();
+  const last = document.getElementById("cLast").value.trim();
+  const phone = document.getElementById("cPhone").value.trim();
+  const email = document.getElementById("cEmail").value.trim();
+  const date = document.getElementById("cDate").value;
+  const errorEl = document.getElementById("claimError");
+  if(!first || !last || !phone || !date){
+    errorEl.textContent = "Fill in your first name, last name, phone number, and expected date.";
+    errorEl.style.display = "block";
+    return;
+  }
+  const item = ITEMS.find(i => i.id === pendingDemoItemId);
+  demoClaims[item.name] = {
+    "Gift item": item.name,
+    "First name": first,
+    "Last name": last,
+    "Phone number": phone,
+    "Email": email,
+    "Expected delivery date": date,
+    "Delivered": "",
+    "Relisted": ""
+  };
+  closeOverlay("claimOverlay");
+  render();
+});
 
 function render(){ renderFilters(); renderProgress(); renderGrid(); }
 
@@ -328,7 +401,8 @@ document.getElementById("trackSubmit").addEventListener("click", () => {
   const q = document.getElementById("trackLookup").value.trim().toLowerCase();
   const resultEl = document.getElementById("trackResult");
   if(!q){ resultEl.innerHTML = '<p class="error-msg" style="display:block;">Enter a phone number or email first.</p>'; return; }
-  const matches = rows.filter(r =>
+  const pool = DEMO_MODE ? Object.values(demoClaims) : rows;
+  const matches = pool.filter(r =>
     ((r["Phone number"] || "").toLowerCase().includes(q)) ||
     ((r["Email"] || "").toLowerCase().includes(q))
   );
