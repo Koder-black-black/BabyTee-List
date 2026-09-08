@@ -1,0 +1,429 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>A wishlist for the new arrival</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,400;0,9..144,500;0,9..144,600;1,9..144,500&family=Work+Sans:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#EFF1E6; --surface:#FBFAF4; --ink:#26291F; --ink-soft:#5C6153; --line:#DAD9CC;
+    --plum:#6E5C8F; --plum-dark:#4E4166; --sage:#62775A; --sage-light:#E4EADD;
+    --danger:#A34432; --danger-light:#F4E1DB;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:'Work Sans', sans-serif;line-height:1.5;}
+  .wrap{max-width:1080px;margin:0 auto;padding:56px 32px 96px;}
+  .serif{font-family:'Fraunces', serif;}
+  .topnav{display:flex;justify-content:flex-end;gap:10px;margin-bottom:28px;flex-wrap:wrap;}
+  .nav-link{font-size:13px;color:var(--ink-soft);background:transparent;border:1px solid var(--line);padding:7px 14px;border-radius:20px;cursor:pointer;}
+  .nav-link:hover{border-color:var(--ink-soft);}
+  header.hero{display:grid;grid-template-columns:1.3fr 0.7fr;gap:48px;align-items:center;padding-bottom:40px;border-bottom:1px solid var(--line);margin-bottom:28px;}
+  .eyebrow{font-size:14px;color:var(--ink-soft);margin:0 0 10px;}
+  h1{font-family:'Fraunces', serif;font-weight:500;font-size:44px;line-height:1.12;margin:0 0 18px;letter-spacing:-0.01em;}
+  h1 em{font-style:italic;font-weight:400;color:var(--plum-dark);}
+  .story{font-size:16px;color:var(--ink-soft);max-width:52ch;margin:0 0 22px;}
+  .progress-row{display:flex;align-items:center;gap:14px;max-width:420px;}
+  .progress-track{flex:1;height:8px;border-radius:5px;background:var(--line);overflow:hidden;}
+  .progress-fill{height:100%;background:var(--sage);transition:width .5s ease;width:0%;}
+  .progress-label{font-size:13px;color:var(--ink-soft);white-space:nowrap;}
+  .illo{width:100%;height:auto;}
+  .sync-row{display:flex;align-items:center;gap:10px;margin-bottom:22px;font-size:13px;color:var(--ink-soft);}
+  .sync-row button{font-size:13px;padding:6px 12px;border-radius:6px;border:1px solid var(--line);background:#fff;cursor:pointer;}
+  .filters{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:28px;}
+  .filter-pill{font-family:'Work Sans', sans-serif;font-size:14px;padding:8px 16px;border-radius:20px;border:1px solid var(--line);background:transparent;color:var(--ink-soft);cursor:pointer;}
+  .filter-pill.active{background:var(--ink);border-color:var(--ink);color:var(--surface);}
+  .grid{display:grid;grid-template-columns:repeat(auto-fill, minmax(270px, 1fr));gap:18px;}
+  .card{background:var(--surface);border:1px solid var(--line);border-left:4px solid var(--cat-color, var(--sage));border-radius:6px;padding:20px 20px 18px;display:flex;flex-direction:column;gap:10px;}
+  .card.claimed{opacity:.62;}
+  .card-top{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;}
+  .tag{font-size:12px;padding:3px 10px;border-radius:12px;background:var(--cat-tint, var(--sage-light));color:var(--cat-color, var(--sage));white-space:nowrap;}
+  .item-name{font-family:'Fraunces', serif;font-weight:500;font-size:19px;margin:0;}
+  .item-note{font-size:14px;color:var(--ink-soft);margin:0;flex:1;}
+  .item-price{font-size:14px;color:var(--ink);font-weight:500;}
+  .claim-row{display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:4px;}
+  .claim-btn{font-family:'Work Sans', sans-serif;font-size:14px;font-weight:500;padding:9px 16px;border-radius:7px;border:1px solid var(--plum);background:var(--plum);color:#fff;cursor:pointer;text-decoration:none;display:inline-block;}
+  .claim-btn:hover{background:var(--plum-dark);border-color:var(--plum-dark);}
+  .claimed-note{font-size:13px;color:var(--sage);}
+  .overdue-note{font-size:13px;color:var(--danger);}
+  .overlay{position:fixed;inset:0;background:rgba(38,41,31,.45);display:none;align-items:flex-start;justify-content:center;padding:60px 20px;z-index:50;overflow:auto;}
+  .overlay.open{display:flex;}
+  .panel{background:var(--surface);border-radius:10px;max-width:560px;width:100%;padding:32px;border:1px solid var(--line);}
+  .panel h2{font-family:'Fraunces', serif;font-weight:500;font-size:24px;margin:0 0 6px;}
+  .panel p.sub{font-size:14px;color:var(--ink-soft);margin:0 0 18px;}
+  .panel .close-row{display:flex;justify-content:flex-end;margin-bottom:8px;}
+  .panel .close-btn{background:none;border:none;font-size:14px;color:var(--ink-soft);cursor:pointer;}
+  .pin-row{display:flex;gap:8px;margin-bottom:14px;}
+  .pin-row input{flex:1;font-size:14px;padding:9px 12px;border:1px solid var(--line);border-radius:7px;}
+  .error-msg{font-size:12.5px;color:var(--danger);margin:0;display:none;}
+  .reminder-banner{background:var(--danger-light);color:var(--danger);border-radius:8px;padding:12px 14px;font-size:13.5px;margin-bottom:10px;}
+  .track-item{border-bottom:1px solid var(--line);padding:10px 0;font-size:14px;}
+  footer{margin-top:56px;padding-top:24px;border-top:1px solid var(--line);font-size:13px;color:var(--ink-soft);}
+  @media (max-width:720px){
+    header.hero{grid-template-columns:1fr;}
+    .illo{max-width:220px;margin:0 auto;}
+    h1{font-size:34px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="topnav">
+    <button class="nav-link" id="openTrack">Track a gift I claimed</button>
+  </div>
+
+  <header class="hero">
+    <div>
+      <p class="eyebrow">A wishlist, not a checklist</p>
+      <h1>Something for<br><em>Tina &amp; the baby</em>, on the way</h1>
+      <p class="story">Due in November, in Lagos. Pick something below — it opens a short form. Once you submit it, the gift shows as spoken for here, so no one doubles up.</p>
+      <div class="progress-row">
+        <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+        <span class="progress-label" id="progressLabel">Loading…</span>
+      </div>
+    </div>
+    <svg class="illo" viewBox="0 0 220 220" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Illustration of a plant growing from a seed">
+      <circle cx="110" cy="150" r="55" fill="#E4EADD"/>
+      <path d="M110 150 C110 110, 90 95, 78 70" stroke="#62775A" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M110 150 C110 120, 128 105, 142 88" stroke="#62775A" stroke-width="3" fill="none" stroke-linecap="round"/>
+      <path d="M110 150 C110 130, 110 110, 110 82" stroke="#3E5A38" stroke-width="4" fill="none" stroke-linecap="round"/>
+      <ellipse cx="110" cy="76" rx="16" ry="22" fill="#8A9F7F"/>
+      <ellipse cx="86" cy="66" rx="13" ry="18" fill="#A7BC9B" transform="rotate(-25 86 66)"/>
+      <ellipse cx="136" cy="82" rx="13" ry="18" fill="#A7BC9B" transform="rotate(25 136 82)"/>
+      <ellipse cx="110" cy="185" rx="36" ry="10" fill="#D8CBB0"/>
+    </svg>
+  </header>
+
+  <div class="sync-row">
+    <span id="syncLabel">Checking what's already claimed…</span>
+    <button id="refreshBtn">Refresh</button>
+  </div>
+
+  <div class="filters" id="filters"></div>
+  <div class="grid" id="grid"></div>
+
+  <footer>
+    Claiming a gift opens a short Google Form. Your phone number and email are only seen by the parents, in their own response sheet — not shown to other guests here. If a gift you claimed goes well past its expected date, the parents may relist it so someone else can bring it instead, so please keep the date you give realistic.
+  </footer>
+</div>
+
+<div class="overlay" id="trackOverlay">
+  <div class="panel">
+    <div class="close-row"><button class="close-btn" data-close="trackOverlay">Close</button></div>
+    <h2 class="serif">Track a gift you claimed</h2>
+    <p class="sub">Enter the phone number or email you used on the form.</p>
+    <div class="pin-row">
+      <input type="text" id="trackLookup" placeholder="Phone or email">
+      <button class="claim-btn" id="trackSubmit">Look up</button>
+    </div>
+    <div id="trackResult"></div>
+  </div>
+</div>
+
+<div class="overlay" id="claimOverlay">
+  <div class="panel">
+    <div class="close-row"><button class="close-btn" data-close="claimOverlay">Close</button></div>
+    <h2 class="serif" id="claimTitle">Claim this gift</h2>
+    <p class="sub">Sample mode — this stays on your device for now, but it collects the same details the real form will.</p>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div>
+          <p style="font-size:12px;color:var(--ink-soft);margin:0 0 4px;">First name</p>
+          <input type="text" id="cFirst" placeholder="Chiamaka" style="width:100%;font-size:13px;padding:8px 10px;border:1px solid var(--line);border-radius:6px;">
+        </div>
+        <div>
+          <p style="font-size:12px;color:var(--ink-soft);margin:0 0 4px;">Last name</p>
+          <input type="text" id="cLast" placeholder="Okafor" style="width:100%;font-size:13px;padding:8px 10px;border:1px solid var(--line);border-radius:6px;">
+        </div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;">
+        <div>
+          <p style="font-size:12px;color:var(--ink-soft);margin:0 0 4px;">Phone number</p>
+          <input type="text" id="cPhone" placeholder="080X XXX XXXX" style="width:100%;font-size:13px;padding:8px 10px;border:1px solid var(--line);border-radius:6px;">
+        </div>
+        <div>
+          <p style="font-size:12px;color:var(--ink-soft);margin:0 0 4px;">Email</p>
+          <input type="text" id="cEmail" placeholder="chiamaka@email.com" style="width:100%;font-size:13px;padding:8px 10px;border:1px solid var(--line);border-radius:6px;">
+        </div>
+      </div>
+      <div>
+        <p style="font-size:12px;color:var(--ink-soft);margin:0 0 4px;">Expected delivery date</p>
+        <input type="date" id="cDate" style="width:100%;font-size:13px;padding:8px 10px;border:1px solid var(--line);border-radius:6px;">
+      </div>
+      <p class="error-msg" id="claimError"></p>
+      <div style="display:flex;gap:8px;margin-top:4px;">
+        <button class="claim-btn" id="claimSubmit">Confirm gift</button>
+        <button class="claim-btn" data-close="claimOverlay" style="background:transparent;color:var(--ink-soft);border-color:var(--line);">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ====================== SETUP: fill these in ======================
+   1. sheetId / sheetGid come from your Google Sheet's URL (the one linked
+      to your Google Form's responses): 
+      https://docs.google.com/spreadsheets/d/SHEET_ID/edit#gid=SHEET_GID
+   2. formViewUrl is your form's normal "Send" link (the /viewform one).
+   3. Each entryXxx is the field ID Google Forms uses for that question.
+      Get these with "Get pre-filled link" in the form's overflow menu:
+      fill in one dummy answer per question, click "Get link", and look at
+      the generated URL for "entry.123456789=..." next to each question.
+   Your Sheet must be shared as "Anyone with the link – Viewer" for the
+   page to be able to read it.
+===================================================================== */
+const CONFIG = {
+  sheetId: "YOUR_SHEET_ID_HERE",
+  sheetGid: "0",
+  formViewUrl: "https://docs.google.com/forms/d/e/YOUR_FORM_ID_HERE/viewform",
+  entryGiftItem: "entry.111111111",
+  entryFirst: "entry.222222222",
+  entryLast: "entry.333333333",
+  entryPhone: "entry.444444444",
+  entryEmail: "entry.555555555",
+  entryDate: "entry.666666666"
+};
+
+const CATEGORIES = {
+  nursery: { label: "Nursery & sleep", color: "#62775A", tint: "#E4EADD" },
+  feeding: { label: "Feeding", color: "#A85D6E", tint: "#F1E1E4" },
+  outings: { label: "On the go", color: "#3E7C8C", tint: "#DDE9EA" },
+  formom:  { label: "For Tina", color: "#8A6A9A", tint: "#EAE1EE" }
+};
+
+const ITEMS = [
+  { id:"crib", name:"Convertible crib", category:"nursery", price:"₦150,000–250,000", note:"Grows from crib to toddler bed. Any neutral wood finish works." },
+  { id:"bassinet", name:"Bedside bassinet", category:"nursery", price:"₦60,000–100,000", note:"For the first few months, right next to the bed." },
+  { id:"monitor", name:"Baby monitor", category:"nursery", price:"₦35,000–80,000", note:"Video preferred, but audio-only is genuinely fine too." },
+  { id:"swaddles", name:"Swaddle set", category:"nursery", price:"₦12,000–20,000", note:"Muslin, a few of them — they get used constantly." },
+  { id:"pump", name:"Breast pump", category:"feeding", price:"₦70,000–150,000", note:"Check with Tina first — she may have a brand preference." },
+  { id:"nursingpillow", name:"Nursing pillow", category:"feeding", price:"₦18,000–28,000", note:"Saves the arms during long feeding sessions." },
+  { id:"bottles", name:"Starter bottle set", category:"feeding", price:"₦12,000–22,000", note:"Slow-flow nipples, a few different sizes." },
+  { id:"carrier", name:"Baby carrier", category:"outings", price:"₦35,000–75,000", note:"Front-carry style, adjustable for both parents." },
+  { id:"stroller", name:"Stroller", category:"outings", price:"₦100,000–220,000", note:"The big-ticket item — happy to split this one with someone." },
+  { id:"carseat", name:"Infant car seat", category:"outings", price:"₦70,000–130,000", note:"Needed before you bring the baby home, so time-sensitive." },
+  { id:"postpartumkit", name:"Postpartum recovery kit", category:"formom", price:"₦15,000–25,000", note:"Sitz bath salts, pads, the practical stuff no one else thinks of." },
+  { id:"mealtrain", name:"A week of home-cooked meals", category:"formom", price:"₦25,000–45,000", note:"Cook a batch and drop it by, or arrange a food delivery week." },
+  { id:"robe", name:"Nursing-friendly robe", category:"formom", price:"₦15,000–25,000", note:"Soft, easy-access, something to live in for the first weeks." }
+];
+
+let rows = [];
+let activeFilter = "all";
+const DEMO_MODE = (CONFIG.sheetId === "YOUR_SHEET_ID_HERE");
+let demoClaims = {};
+
+function parseDate(str){
+  if(!str) return null;
+  const d = new Date(str);
+  return isNaN(d.getTime()) ? null : d;
+}
+
+async function fetchRows(){
+  const syncLabel = document.getElementById("syncLabel");
+  syncLabel.textContent = "Checking what's already claimed…";
+  if(DEMO_MODE){
+    syncLabel.textContent = "Sample mode — claims here only show in your own browser, for now.";
+    rows = [];
+    render();
+    return;
+  }
+  try{
+    const url = "https://docs.google.com/spreadsheets/d/" + CONFIG.sheetId + "/gviz/tq?gid=" + CONFIG.sheetGid + "&tqx=out:json";
+    const res = await fetch(url);
+    const text = await res.text();
+    const json = JSON.parse(text.substring(text.indexOf("{"), text.lastIndexOf("}") + 1));
+    const cols = json.table.cols.map(c => (c.label || "").trim());
+    rows = json.table.rows.map(r => {
+      const obj = {};
+      r.c.forEach((cell, i) => { obj[cols[i]] = cell ? (cell.f !== undefined && cell.f !== null ? cell.f : cell.v) : ""; });
+      return obj;
+    });
+    syncLabel.textContent = "Up to date as of " + new Date().toLocaleTimeString();
+  } catch(e){
+    console.error("Could not read the sheet", e);
+    syncLabel.textContent = "Couldn't reach the response sheet just now — try Refresh in a moment.";
+  }
+  render();
+}
+
+function latestClaimFor(itemName){
+  if(DEMO_MODE){ return demoClaims[itemName] || null; }
+  const matches = rows.filter(r => (r["Gift item"] || "").trim() === itemName);
+  if(matches.length === 0) return null;
+  matches.sort((a,b) => new Date(a["Timestamp"]) - new Date(b["Timestamp"]));
+  const last = matches[matches.length - 1];
+  const relisted = (last["Relisted"] || "").trim().toLowerCase() === "yes";
+  return relisted ? null : last;
+}
+
+function isOverdue(claim){
+  if(!claim) return false;
+  const delivered = (claim["Delivered"] || "").trim().toLowerCase() === "yes";
+  const due = parseDate(claim["Expected delivery date"]);
+  if(delivered || !due) return false;
+  return due.getTime() < new Date().setHours(0,0,0,0);
+}
+
+function renderFilters(){
+  const el = document.getElementById("filters");
+  const all = [{key:"all", label:"All gifts"}, ...Object.entries(CATEGORIES).map(([k,v]) => ({key:k, label:v.label}))];
+  el.innerHTML = "";
+  all.forEach(f => {
+    const btn = document.createElement("button");
+    btn.className = "filter-pill" + (activeFilter === f.key ? " active" : "");
+    btn.textContent = f.label;
+    btn.onclick = () => { activeFilter = f.key; render(); };
+    el.appendChild(btn);
+  });
+}
+
+function renderProgress(){
+  const total = ITEMS.length;
+  const claimedCount = ITEMS.filter(it => latestClaimFor(it.name)).length;
+  const pct = total ? Math.round((claimedCount/total)*100) : 0;
+  document.getElementById("progressFill").style.width = pct + "%";
+  document.getElementById("progressLabel").textContent = claimedCount + " of " + total + " gifts found a home";
+}
+
+function claimUrl(itemName){
+  const params = new URLSearchParams();
+  params.set(CONFIG.entryGiftItem, itemName);
+  return CONFIG.formViewUrl + "?" + params.toString();
+}
+
+function renderGrid(){
+  const grid = document.getElementById("grid");
+  grid.innerHTML = "";
+  const visible = ITEMS.filter(it => activeFilter === "all" || it.category === activeFilter);
+  visible.forEach(item => {
+    const cat = CATEGORIES[item.category];
+    const claim = latestClaimFor(item.name);
+    const overdue = isOverdue(claim);
+    const card = document.createElement("div");
+    card.className = "card" + (claim ? " claimed" : "");
+    card.style.setProperty("--cat-color", cat.color);
+    card.style.setProperty("--cat-tint", cat.tint);
+    let rightSide;
+    if(claim && overdue){
+      rightSide = '<span class="overdue-note">Overdue — parents may relist this soon</span>';
+    } else if(claim && DEMO_MODE){
+      rightSide = '<span class="claimed-note">Spoken for</span> <button class="claim-btn" data-demo-undo="' + item.id + '" style="background:transparent;color:var(--ink-soft);border-color:var(--line);">Undo</button>';
+    } else if(claim){
+      rightSide = '<span class="claimed-note">Spoken for</span>';
+    } else if(DEMO_MODE){
+      rightSide = '<button class="claim-btn" data-demo-claim="' + item.id + '">I\u2019ll bring this</button>';
+    } else {
+      rightSide = '<a class="claim-btn" href="' + claimUrl(item.name) + '" target="_blank" rel="noopener">I\u2019ll bring this</a>';
+    }
+    card.innerHTML = `
+      <div class="card-top">
+        <span class="tag">${cat.label}</span>
+        <span class="item-price">${item.price}</span>
+      </div>
+      <p class="item-name serif">${item.name}</p>
+      <p class="item-note">${item.note}</p>
+      <div class="claim-row">${rightSide}</div>
+    `;
+    grid.appendChild(card);
+  });
+  if(DEMO_MODE){
+    grid.querySelectorAll("[data-demo-claim]").forEach(btn => {
+      btn.addEventListener("click", () => openDemoClaimForm(btn.dataset.demoClaim));
+    });
+    grid.querySelectorAll("[data-demo-undo]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const item = ITEMS.find(i => i.id === btn.dataset.demoUndo);
+        delete demoClaims[item.name];
+        render();
+      });
+    });
+  }
+}
+
+let pendingDemoItemId = null;
+
+function openDemoClaimForm(itemId){
+  pendingDemoItemId = itemId;
+  const item = ITEMS.find(i => i.id === itemId);
+  document.getElementById("claimTitle").textContent = "Claim: " + item.name;
+  ["cFirst","cLast","cPhone","cEmail","cDate"].forEach(id => document.getElementById(id).value = "");
+  document.getElementById("claimError").style.display = "none";
+  openOverlay("claimOverlay");
+}
+
+document.getElementById("claimSubmit").addEventListener("click", () => {
+  const first = document.getElementById("cFirst").value.trim();
+  const last = document.getElementById("cLast").value.trim();
+  const phone = document.getElementById("cPhone").value.trim();
+  const email = document.getElementById("cEmail").value.trim();
+  const date = document.getElementById("cDate").value;
+  const errorEl = document.getElementById("claimError");
+  if(!first || !last || !phone || !date){
+    errorEl.textContent = "Fill in your first name, last name, phone number, and expected date.";
+    errorEl.style.display = "block";
+    return;
+  }
+  const item = ITEMS.find(i => i.id === pendingDemoItemId);
+  demoClaims[item.name] = {
+    "Gift item": item.name,
+    "First name": first,
+    "Last name": last,
+    "Phone number": phone,
+    "Email": email,
+    "Expected delivery date": date,
+    "Delivered": "",
+    "Relisted": ""
+  };
+  closeOverlay("claimOverlay");
+  render();
+});
+
+function render(){ renderFilters(); renderProgress(); renderGrid(); }
+
+document.getElementById("refreshBtn").addEventListener("click", fetchRows);
+
+function openOverlay(id){ document.getElementById(id).classList.add("open"); }
+function closeOverlay(id){ document.getElementById(id).classList.remove("open"); }
+document.querySelectorAll("[data-close]").forEach(btn => {
+  btn.addEventListener("click", () => closeOverlay(btn.dataset.close));
+});
+
+document.getElementById("openTrack").addEventListener("click", () => {
+  document.getElementById("trackResult").innerHTML = "";
+  document.getElementById("trackLookup").value = "";
+  openOverlay("trackOverlay");
+});
+
+document.getElementById("trackSubmit").addEventListener("click", () => {
+  const q = document.getElementById("trackLookup").value.trim().toLowerCase();
+  const resultEl = document.getElementById("trackResult");
+  if(!q){ resultEl.innerHTML = '<p class="error-msg" style="display:block;">Enter a phone number or email first.</p>'; return; }
+  const pool = DEMO_MODE ? Object.values(demoClaims) : rows;
+  const matches = pool.filter(r =>
+    ((r["Phone number"] || "").toLowerCase().includes(q)) ||
+    ((r["Email"] || "").toLowerCase().includes(q))
+  );
+  if(matches.length === 0){
+    resultEl.innerHTML = '<p style="font-size:14px;color:var(--ink-soft);">No claims found for that phone or email.</p>';
+    return;
+  }
+  resultEl.innerHTML = matches.map(c => {
+    const overdue = isOverdue(c);
+    const delivered = (c["Delivered"] || "").trim().toLowerCase() === "yes";
+    let status = delivered ? "Marked delivered" : (overdue ? "Overdue — please follow up" : "On track");
+    return `<div class="track-item">
+      ${overdue && !delivered ? '<div class="reminder-banner">This gift was due ' + (c["Expected delivery date"] || "") + ' and has not been marked delivered yet. Please arrange delivery or let the parents know of a new date.</div>' : ''}
+      <strong>${c["Gift item"] || ""}</strong><br>
+      Expected: ${c["Expected delivery date"] || ""} &nbsp; ${status}
+    </div>`;
+  }).join("");
+});
+
+fetchRows();
+if(!DEMO_MODE){ setInterval(fetchRows, 60000); }
+</script>
+</body>
+</html>
