@@ -173,6 +173,8 @@ const ITEMS = [
 
 let rows = [];
 let activeFilter = "all";
+const DEMO_MODE = (CONFIG.sheetId === "YOUR_SHEET_ID_HERE");
+let demoClaims = {};
 
 function parseDate(str){
   if(!str) return null;
@@ -183,8 +185,8 @@ function parseDate(str){
 async function fetchRows(){
   const syncLabel = document.getElementById("syncLabel");
   syncLabel.textContent = "Checking what's already claimed…";
-  if(CONFIG.sheetId === "YOUR_SHEET_ID_HERE"){
-    syncLabel.textContent = "Demo mode — connect a Google Sheet in the code to track real claims.";
+  if(DEMO_MODE){
+    syncLabel.textContent = "Sample mode — claims here only show in your own browser, for now.";
     rows = [];
     render();
     return;
@@ -209,6 +211,7 @@ async function fetchRows(){
 }
 
 function latestClaimFor(itemName){
+  if(DEMO_MODE){ return demoClaims[itemName] || null; }
   const matches = rows.filter(r => (r["Gift item"] || "").trim() === itemName);
   if(matches.length === 0) return null;
   matches.sort((a,b) => new Date(a["Timestamp"]) - new Date(b["Timestamp"]));
@@ -267,8 +270,12 @@ function renderGrid(){
     let rightSide;
     if(claim && overdue){
       rightSide = '<span class="overdue-note">Overdue — parents may relist this soon</span>';
+    } else if(claim && DEMO_MODE){
+      rightSide = '<span class="claimed-note">Spoken for</span> <button class="claim-btn" data-demo-undo="' + item.id + '" style="background:transparent;color:var(--ink-soft);border-color:var(--line);">Undo</button>';
     } else if(claim){
       rightSide = '<span class="claimed-note">Spoken for</span>';
+    } else if(DEMO_MODE){
+      rightSide = '<button class="claim-btn" data-demo-claim="' + item.id + '">I\u2019ll bring this</button>';
     } else {
       rightSide = '<a class="claim-btn" href="' + claimUrl(item.name) + '" target="_blank" rel="noopener">I\u2019ll bring this</a>';
     }
@@ -283,6 +290,22 @@ function renderGrid(){
     `;
     grid.appendChild(card);
   });
+  if(DEMO_MODE){
+    grid.querySelectorAll("[data-demo-claim]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const item = ITEMS.find(i => i.id === btn.dataset.demoClaim);
+        demoClaims[item.name] = { "Gift item": item.name, "Expected delivery date": "", "Delivered": "", "Relisted": "" };
+        render();
+      });
+    });
+    grid.querySelectorAll("[data-demo-undo]").forEach(btn => {
+      btn.addEventListener("click", () => {
+        const item = ITEMS.find(i => i.id === btn.dataset.demoUndo);
+        delete demoClaims[item.name];
+        render();
+      });
+    });
+  }
 }
 
 function render(){ renderFilters(); renderProgress(); renderGrid(); }
@@ -326,7 +349,7 @@ document.getElementById("trackSubmit").addEventListener("click", () => {
 });
 
 fetchRows();
-setInterval(fetchRows, 60000);
+if(!DEMO_MODE){ setInterval(fetchRows, 60000); }
 </script>
 </body>
 </html>
